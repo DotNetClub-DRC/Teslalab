@@ -13,5 +13,9 @@ namespace Teslalab.Server.Services
         Task<OperationResponse<PlaylistDto>> RemoveAsync(string id);
 
         CollectionResponse<PlaylistDto> GetAllPlaylists(int pageNumber = 1, int pageSize = 10);
+
+        Task<OperationResponse<VideoDto>> AssignOrRemoveVideoFromPlaylistAsync(PlaylistVideoRequest request);
+
+        Task<OperationResponse<PlaylistDto>> GetSinglePlaylistAsync(string id);
     }
 }

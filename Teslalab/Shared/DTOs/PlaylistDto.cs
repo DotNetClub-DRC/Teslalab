@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Teslalab.Shared.DTOs
 {
@@ -13,6 +14,6 @@ namespace Teslalab.Shared.DTOs
         [StringLength(5000)]
         public string Description { get; set; }
 
-        //public IEnumerable<VideoDto> { get; set; }
+        public IEnumerable<VideoDto> Videos { get; set; }
     }
 }

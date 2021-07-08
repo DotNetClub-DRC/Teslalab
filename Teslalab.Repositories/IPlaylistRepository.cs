@@ -12,6 +12,14 @@ namespace Teslalab.Repositories
 
         void Remove(Playlist playlist);
 
+        IEnumerable<Video> GetAllVideosInPlaylist(string id);
+
+        void RemoveVideoFromPlaylist(PlaylistVideo playlistVideo);
+
+        Task AddVideoToPlaylistAsync(PlaylistVideo playlistVideo);
+
+        Task<Playlist> GetByIdAsync(string id);
+
         IEnumerable<Playlist> GetAll();
 
         Task<Playlist> GetPlaylistById(string id);

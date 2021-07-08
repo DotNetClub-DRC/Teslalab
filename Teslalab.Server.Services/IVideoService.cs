@@ -12,6 +12,8 @@ namespace Teslalab.Server.Services
 
         Task<OperationResponse<VideoDto>> RemoveAsync(string id);
 
+        Task<OperationResponse<VideoDto>> GetVideoDtoAsync(string videoId);
+
         CollectionResponse<VideoDto> GetAllVideos(string query, int pageNumber = 1, int pageSize = 10);
     }
 }

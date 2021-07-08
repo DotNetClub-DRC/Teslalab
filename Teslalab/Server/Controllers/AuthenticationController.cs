@@ -20,6 +20,8 @@ namespace Teslalab.Server.Controllers
             _usersService = usersSerivce;
         }
 
+        [ProducesResponseType(200, Type = typeof(LoginResponse))]
+        [ProducesResponseType(400, Type = typeof(LoginResponse))]
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginRequest model)
         {
@@ -30,6 +32,8 @@ namespace Teslalab.Server.Controllers
             return Ok(result);
         }
 
+        [ProducesResponseType(200, Type = typeof(OperationResponse<string>))]
+        [ProducesResponseType(400, Type = typeof(OperationResponse<string>))]
         [HttpPost("Register")]
         public async Task<IActionResult> Register(RegisterRequest model)
         {

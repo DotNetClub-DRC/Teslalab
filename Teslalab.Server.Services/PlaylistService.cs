@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using AutoMapper;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Teslalab.Repositories;
@@ -14,11 +15,62 @@ namespace Teslalab.Server.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IdentityOptions _identity;
+        private readonly IMapper _mapper;
 
-        public PlaylistService(IUnitOfWork unitOfWork, IdentityOptions identity)
+        public PlaylistService(IUnitOfWork unitOfWork, IdentityOptions identity, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _identity = identity;
+            _mapper = mapper;
+        }
+
+        public async Task<OperationResponse<VideoDto>> AssignOrRemoveVideoFromPlaylistAsync(PlaylistVideoRequest request)
+        {
+            var video = await _unitOfWork.Videos.GetByIdAsync(request.VideoId);
+            if (video == null)
+                return new OperationResponse<VideoDto>
+                {
+                    IsSuccess = false,
+                    Message = "Video Cannot be found"
+                };
+
+            var playlist = await _unitOfWork.Playlists.GetByIdAsync(request.PlaylistId);
+            if (playlist == null)
+                return new OperationResponse<VideoDto>
+                {
+                    IsSuccess = false,
+                    Message = "Playlist Cannot be found"
+                };
+
+            var playlistVideo = playlist.PlaylistVideos.SingleOrDefault(pv => pv.VideoId == request.VideoId);
+
+            string message = string.Empty;
+            // Check if the video is already in the playlist
+            if (playlistVideo != null)
+            {
+                // Remove the video from the playlist
+                _unitOfWork.Playlists.RemoveVideoFromPlaylist(playlistVideo);
+
+                message = "Video has been removed from the playlist";
+            }
+            else
+            {
+                // Add the video the playlist
+                await _unitOfWork.Playlists.AddVideoToPlaylistAsync(new PlaylistVideo
+                {
+                    Playlist = playlist,
+                    Video = video
+                });
+
+                message = "Video has been added from the playlist";
+            }
+            await _unitOfWork.CommitChangesAsync(_identity.UserId);
+
+            return new OperationResponse<VideoDto>
+            {
+                IsSuccess = true,
+                Message = message
+            };
         }
 
         public async Task<OperationResponse<PlaylistDto>> CreateAsync(PlaylistDto model)
@@ -76,6 +128,22 @@ namespace Teslalab.Server.Services
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 PagesCount = pagesCount
+            };
+        }
+
+        public async Task<OperationResponse<PlaylistDto>> GetSinglePlaylistAsync(string id)
+        {
+            var playlist = await _unitOfWork.Playlists.GetByIdAsync(id);
+            if (playlist == null)
+                return new OperationResponse<PlaylistDto> { IsSuccess = false, Message = "Playlist cannot be found" };
+
+            var videos = playlist.PlaylistVideos?.Select(pv => _mapper.Map<VideoDto>(pv.Video)).ToArray();
+
+            return new OperationResponse<PlaylistDto>
+            {
+                Data = playlist.ToPlaylistDto(videos, true),
+                Message = "Playlist has been retrieved successfully!",
+                IsSuccess = true
             };
         }
 

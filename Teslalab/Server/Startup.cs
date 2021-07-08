@@ -112,6 +112,7 @@ namespace Teslalab.Server
             services.AddScoped<IPlaylistService, PlaylistService>();
             services.AddScoped<IVideoService, VideoService>();
             services.AddScoped<IFileStorageService, LocalFileStorageService>();
+            services.AddScoped<ICommentsService, CommentsService>();
 
             services.AddSingleton(provider => new MapperConfiguration(config =>
             {
@@ -119,6 +120,8 @@ namespace Teslalab.Server
             }).CreateMapper());
 
             //services.AddAutoMapper(typeof(VideoProfile));
+
+            services.AddSwaggerGen();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -147,6 +150,13 @@ namespace Teslalab.Server
             app.UseHttpsRedirection();
             app.UseBlazorFrameworkFiles();
             app.UseStaticFiles();
+
+            app.UseSwagger();
+
+            app.UseSwaggerUI(swagger =>
+            {
+                swagger.SwaggerEndpoint("/swagger/v1/swagger.json", "Teslalab API");
+            });
 
             app.UseRouting();
 

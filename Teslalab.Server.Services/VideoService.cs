@@ -19,18 +19,21 @@ namespace Teslalab.Server.Services
         private readonly EnvironmentOptions _env;
         private readonly IMapper _mapper;
         private readonly IFileStorageService _storage;
+        private readonly ICommentsService _commentsService;
 
         public VideoService(IUnitOfWork unitOfWork,
                             IdentityOptions identity,
                             IFileStorageService storage,
                             EnvironmentOptions env,
-                            IMapper mapper)
+                            IMapper mapper,
+                            ICommentsService commentsService)
         {
             _unitOfWork = unitOfWork;
             _identity = identity;
             _storage = storage;
             _env = env;
             _mapper = mapper;
+            _commentsService = commentsService;
         }
 
         public async Task<OperationResponse<VideoDto>> CreateAsync(VideoDto model)
@@ -132,6 +135,29 @@ namespace Teslalab.Server.Services
                 PageNumber = pageNumber,
                 PageSize = pageSize,
                 PagesCount = pagesCount
+            };
+        }
+
+        public async Task<OperationResponse<VideoDto>> GetVideoDtoAsync(string videoId)
+        {
+            var video = await _unitOfWork.Videos.GetByIdAsync(videoId);
+            if (video == null)
+                return new OperationResponse<VideoDto>
+                {
+                    IsSuccess = false,
+                    Message = "Video cannot be found"
+                };
+
+            var videoDto = _mapper.Map<VideoDto>(video);
+
+            // Get all the comments of the video
+            videoDto.Comments = _commentsService.GetVideoComments(videoId);
+
+            return new OperationResponse<VideoDto>
+            {
+                IsSuccess = true,
+                Data = videoDto,
+                Message = "Video retrieved successfully!"
             };
         }
 
